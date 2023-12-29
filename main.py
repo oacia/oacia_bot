@@ -27,10 +27,10 @@ header = {
 api_id = int(os.getenv("API_ID"))
 api_hash = os.getenv("API_HASH")
 bot_token = os.getenv("BOT_TOKEN")
-session = os.getenv("SESSION")
+# session = os.getenv("SESSION")
 
 app = Flask(__name__)
-client = TelegramClient(session, api_id, api_hash).start(bot_token=bot_token)
+client = TelegramClient(session="", api_id=api_id, api_hash=api_hash).start(bot_token=bot_token)
 
 
 @app.route('/callback', methods=['POST'])

@@ -35,7 +35,7 @@ app = Flask(__name__)
 client = TelegramClient(api_id=api_id, api_hash=api_hash).start(bot_token=bot_token)
 
 
-@app.route('/callback/', methods=['POST'])
+@app.route('/callback', methods=['POST'])
 def webhook_handler():
     """Set route /hook with POST method will trigger this method."""
     # app.logger.info("receive message")

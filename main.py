@@ -1,4 +1,5 @@
 from telethon import TelegramClient, events
+from telethon.sessions import StringSession
 import json
 import re
 import requests
@@ -27,14 +28,13 @@ header = {
 api_id = int(os.getenv("API_ID"))
 api_hash = os.getenv("API_HASH")
 bot_token = os.getenv("BOT_TOKEN")
-# session = os.getenv("SESSION")
+session = os.getenv("SESSION")
 
 app = Flask(__name__)
 
-client = TelegramClient(session=None, api_id=api_id, api_hash=api_hash)
-client.log_out()
-client.start(bot_token=bot_token)
-client.connect()
+with TelegramClient(StringSession(session), api_id=api_id, api_hash=api_hash) as client:
+    #client.start(bot_token=bot_token)
+    client.connect()
 
 @app.route('/callback', methods=['POST'])
 async def webhook_handler():

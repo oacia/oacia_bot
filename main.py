@@ -28,18 +28,19 @@ header = {
 api_id = int(os.getenv("API_ID"))
 api_hash = os.getenv("API_HASH")
 bot_token = os.getenv("BOT_TOKEN")
-session = os.getenv("SESSION")
+#session = os.getenv("SESSION")
 
 app = Flask(__name__)
 
-with TelegramClient(StringSession(session), api_id=api_id, api_hash=api_hash) as client:
-    #client.start(bot_token=bot_token)
+with TelegramClient(StringSession(), api_id=api_id, api_hash=api_hash) as client:
+    client.start(bot_token=bot_token)
     client.connect()
+    session = client.session.save()
 
 @app.route('/callback', methods=['POST'])
 async def webhook_handler():
     """Set route /hook with POST method will trigger this method."""
-    app.logger.info("receive message")
+    await client.send_message('oacia', session)
     await client.send_message('oacia', "6666666")
     if request.method == "POST":
         app.logger.info(request.get_json(force=True))

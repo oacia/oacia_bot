@@ -33,7 +33,7 @@ session = os.getenv("SESSION")
 app = Flask(__name__)
 
 client = TelegramClient(StringSession(session), api_id=api_id, api_hash=api_hash)
-
+client.run_until_disconnected()
 @app.route('/callback', methods=['POST'])
 async def webhook_handler():
     """Set route /hook with POST method will trigger this method."""

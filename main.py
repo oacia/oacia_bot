@@ -31,7 +31,7 @@ bot_token = os.getenv("BOT_TOKEN")
 session = os.getenv("SESSION")
 
 app = Flask(__name__)
-
+app.run()
 client = TelegramClient('/tmp/oacia_bot', api_id=api_id, api_hash=api_hash)
 client.start(bot_token=bot_token)
 client.run_until_disconnected()
@@ -113,8 +113,5 @@ async def readMessages(event):
         # 判断链接类型为图集分享类型
     elif re.search(r'/note', surl) != None:
         await pics(surl, user.username, event)
-
-if __name__ == "__main__":
-    app.run()
 # Run the event loop to start receiving messages
 #client.run_until_disconnected()

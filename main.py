@@ -31,8 +31,8 @@ bot_token = os.getenv("BOT_TOKEN")
 
 app = Flask(__name__)
 app.run(debug=True)
-client = TelegramClient(session="", api_id=api_id, api_hash=api_hash).start(bot_token=bot_token)
-
+client = TelegramClient(session=None, api_id=api_id, api_hash=api_hash).start(bot_token=bot_token)
+print("success")
 
 @app.route('/callback', methods=['POST'])
 async def webhook_handler():
@@ -83,7 +83,7 @@ async def pics(surl, user, event):
         await client.send_file(user, photo)
 
 
-@client.on(events.NewMessage(pattern='/start'))
+#@client.on(events.NewMessage(pattern='/start'))
 async def start(event):
     sender = await client.get_entity(event.peer_id.user_id)
     response = f"hello! {sender.username}"
@@ -96,7 +96,7 @@ async def start(event):
     await event.reply(response)
 
 
-@client.on(events.NewMessage(pattern=r'.*v\.douyin\.com.*'))
+#@client.on(events.NewMessage(pattern=r'.*v\.douyin\.com.*'))
 async def readMessages(event):
     user = await client.get_entity(event.peer_id.user_id)
     print(f"{user.username}: [receive] msg{event.text}")

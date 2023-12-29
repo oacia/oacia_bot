@@ -46,6 +46,10 @@ def webhook_handler():
         client.send_message('oacia', request.get_json(force=True))
     return 'ok'
 
+@app.route('/')
+def webhook_handler():
+    return 'hello world'
+
 
 # 抖音视频无水印
 async def videos(surl, user, event):
@@ -117,5 +121,5 @@ async def readMessages(event):
 
 # Run the event loop to start receiving messages
 # client.run_until_disconnected()
-app.run(host='0.0.0.0')
+app.run()
 client.connect()

@@ -48,7 +48,7 @@ def webhook_handler():
 
 
 @app.route('/')
-def webhook_handler():
+def home():
     return 'hello world'
 
 

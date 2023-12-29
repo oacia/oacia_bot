@@ -36,14 +36,14 @@ client = TelegramClient(session=StringSession(session), api_id=api_id, api_hash=
 client.connect()
 
 @app.route('/callback', methods=['POST'])
-def webhook_handler():
+async def webhook_handler():
     """Set route /hook with POST method will trigger this method."""
     # app.logger.info("receive message")
-    client.send_message('oacia', "6666666")
+    await client.send_message('oacia', "6666666")
     if request.method == "POST":
         app.logger.info(request.get_json(force=True))
-        client.send_message('oacia', "12345678")
-        client.send_message('oacia', request.get_json(force=True))
+        await client.send_message('oacia', "12345678")
+        await client.send_message('oacia', request.get_json(force=True))
     return 'ok'
 
 

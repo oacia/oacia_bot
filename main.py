@@ -30,12 +30,14 @@ bot_token = os.getenv("BOT_TOKEN")
 # session = os.getenv("SESSION")
 
 app = Flask(__name__)
+app.run(debug=True)
 client = TelegramClient(session="", api_id=api_id, api_hash=api_hash).start(bot_token=bot_token)
 
 
 @app.route('/callback', methods=['POST'])
 async def webhook_handler():
     """Set route /hook with POST method will trigger this method."""
+    print("receive message")
     await client.send_message('oacia', "6666666")
     if request.method == "POST":
         await client.send_message('oacia', "12345678")
@@ -113,4 +115,3 @@ async def readMessages(event):
 
 # Run the event loop to start receiving messages
 #client.run_until_disconnected()
-app.run(debug=True)

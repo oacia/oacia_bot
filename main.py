@@ -32,7 +32,7 @@ session = os.getenv("SESSION")
 
 app = Flask(__name__)
 
-client = TelegramClient(api_id=api_id, api_hash=api_hash).start(bot_token=bot_token)
+client = TelegramClient(session=StringSession(session), api_id=api_id, api_hash=api_hash).start(bot_token=bot_token)
 
 
 @app.route('/callback', methods=['POST'])
@@ -45,6 +45,7 @@ def webhook_handler():
         client.send_message('oacia', "12345678")
         client.send_message('oacia', request.get_json(force=True))
     return 'ok'
+
 
 @app.route('/')
 def webhook_handler():

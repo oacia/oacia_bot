@@ -1,4 +1,4 @@
 /.idea/
-/config.json
+/secret/
 /oacia_bot.session
 /oacia_bot.session-journal

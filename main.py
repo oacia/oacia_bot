@@ -31,10 +31,8 @@ bot_token = os.getenv("BOT_TOKEN")
 session = os.getenv("SESSION")
 
 app = Flask(__name__)
-app.run()
-client = TelegramClient('/tmp/oacia_bot', api_id=api_id, api_hash=api_hash)
-client.start(bot_token=bot_token)
-client.run_until_disconnected()
+
+client = TelegramClient('/tmp/oacia_bot123', api_id=api_id, api_hash=api_hash).start(bot_token=bot_token)
 @app.route('/callback', methods=['POST'])
 def webhook_handler():
     """Set route /hook with POST method will trigger this method."""
@@ -45,6 +43,10 @@ def webhook_handler():
         client.send_message('oacia', "12345678")
         client.send_message('oacia', request.get_json(force=True))
     return 'ok'
+
+@app.route('/')
+def home():
+    return 'Hello, World!'
 
 
 # 抖音视频无水印
@@ -115,3 +117,5 @@ async def readMessages(event):
         await pics(surl, user.username, event)
 # Run the event loop to start receiving messages
 #client.run_until_disconnected()
+app.run()
+client.connect()

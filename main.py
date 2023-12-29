@@ -4,24 +4,42 @@ import re
 import requests
 from io import BytesIO
 import os
+from flask import Flask, request
+
 # 请求头
 header = {
     "User-Agent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Mobile Safari/537.36"}
 
-# just for my local test...
-config_path = ""
-if os.path.exists('./secret'):
-    config_path = "secret/"
+# # just for my local test...
+# config_path = ""
+# if os.path.exists('./secret'):
+#     config_path = "secret/"
+#
+# with open(f"{config_path}config.json", "r") as file:
+#     credentials = json.loads(file.read())
+#
+# api_id = credentials["API_ID"]
+# api_hash = credentials["API_HASH"]
+# bot_token = credentials["BOT_TOKEN"]
+# session = credentials["SESSION"]
+# proxy = credentials["PROXY"]  # set proxy,eg.["HTTP", "127.0.0.1", 7890]
 
-with open(f"{config_path}config.json", "r") as file:
-    credentials = json.loads(file.read())
+api_id = int(os.getenv("API_ID"))
+api_hash = os.getenv("API_HASH")
+bot_token = os.getenv("BOT_TOKEN")
+session = os.getenv("SESSION")
 
-api_id = credentials["API_ID"]
-api_hash = credentials["API_HASH"]
-bot_token = credentials["BOT_TOKEN"]
-session = credentials["SESSION"]
-proxy = credentials["PROXY"]# set proxy,eg.["HTTP", "127.0.0.1", 7890]
-client = TelegramClient(session, api_id, api_hash, proxy=proxy).start(bot_token=bot_token)
+app = Flask(__name__)
+client = TelegramClient(session, api_id, api_hash).start(bot_token=bot_token)
+
+
+@app.route('/callback', methods=['POST'])
+def webhook_handler():
+    """Set route /hook with POST method will trigger this method."""
+    if request.method == "POST":
+        client.send_message('oacia', request.get_json(force=True))
+    return 'ok'
+
 
 # 抖音视频无水印
 async def videos(surl, user, event):

@@ -33,7 +33,7 @@ session = os.getenv("SESSION")
 app = Flask(__name__)
 
 client = TelegramClient(session=StringSession(session), api_id=api_id, api_hash=api_hash).start(bot_token=bot_token)
-
+client.connect()
 
 @app.route('/callback', methods=['POST'])
 def webhook_handler():
@@ -122,5 +122,5 @@ async def readMessages(event):
 
 # Run the event loop to start receiving messages
 # client.run_until_disconnected()
-app.run()
-client.connect()
+if __name__ == '__main__':
+    app.run()

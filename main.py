@@ -111,3 +111,4 @@ async def readMessages(event):
 
 # Run the event loop to start receiving messages
 client.run_until_disconnected()
+app.run(debug=True)

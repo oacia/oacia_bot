@@ -32,17 +32,20 @@ session = os.getenv("SESSION")
 
 app = Flask(__name__)
 
-client = TelegramClient('/tmp/oacia_bot123', api_id=api_id, api_hash=api_hash).start(bot_token=bot_token)
+client = TelegramClient(api_id=api_id, api_hash=api_hash).start(bot_token=bot_token)
+
+
 @app.route('/callback', methods=['POST'])
 def webhook_handler():
     """Set route /hook with POST method will trigger this method."""
-    #app.logger.info("receive message")
+    # app.logger.info("receive message")
     client.send_message('oacia', "6666666")
     if request.method == "POST":
         app.logger.info(request.get_json(force=True))
         client.send_message('oacia', "12345678")
         client.send_message('oacia', request.get_json(force=True))
     return 'ok'
+
 
 @app.route('/')
 def home():
@@ -87,7 +90,7 @@ async def pics(surl, user, event):
         await client.send_file(user, photo)
 
 
-#@client.on(events.NewMessage(pattern='/start'))
+# @client.on(events.NewMessage(pattern='/start'))
 async def start(event):
     sender = await client.get_entity(event.peer_id.user_id)
     response = f"hello! {sender.username}"
@@ -100,7 +103,7 @@ async def start(event):
     await event.reply(response)
 
 
-#@client.on(events.NewMessage(pattern=r'.*v\.douyin\.com.*'))
+# @client.on(events.NewMessage(pattern=r'.*v\.douyin\.com.*'))
 async def readMessages(event):
     user = await client.get_entity(event.peer_id.user_id)
     print(f"{user.username}: [receive] msg{event.text}")
@@ -115,7 +118,9 @@ async def readMessages(event):
         # 判断链接类型为图集分享类型
     elif re.search(r'/note', surl) != None:
         await pics(surl, user.username, event)
+
+
 # Run the event loop to start receiving messages
-#client.run_until_disconnected()
-app.run()
+# client.run_until_disconnected()
+app.run(host='0.0.0.0')
 client.connect()

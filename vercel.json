@@ -1,8 +1,8 @@
 {
-	"rewrites": [
+	"routes": [
 		{
-			"source": "/(.*)",
-			"destination": "main.py"
+			"src": "/callback",
+			"dest": "main.py"
 		}
 	]
 }

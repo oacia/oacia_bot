@@ -47,11 +47,6 @@ def webhook_handler():
     return 'ok'
 
 
-@app.route('/')
-def home():
-    return 'Hello, World!'
-
-
 # 抖音视频无水印
 async def videos(surl, user, event):
     id = re.search(r'video/(\d+)', surl).group(1)

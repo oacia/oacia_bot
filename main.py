@@ -19,7 +19,7 @@ bot_token = os.getenv("BOT_TOKEN")
 #     credentials = json.loads(file.read())
 # bot_token = credentials["BOT_TOKEN"]
 app = Flask(__name__)
-bot = Application.builder().token(bot_token).build()
+application = Application.builder().token(bot_token).build()
 
 # client = TelegramClient(session=StringSession(session), api_id=api_id, api_hash=api_hash).start(bot_token=bot_token)
 # client.connect()
@@ -28,13 +28,15 @@ bot = Application.builder().token(bot_token).build()
 async def webhook_handler():
     """Set route /callback with POST method will trigger this method."""
     if request.method == "POST":
-        update = Update.de_json(request.get_json(force=True), bot)
-        await bot.process_update(update)
+        await application.update_queue.put(Update.de_json(data=request.get_json(force=True), bot=application.bot))
+        async with application:
+            await application.start()
+            await application.stop()
     return 'ok'
 
 
 @app.route('/')
-def home():
+async def home():
     return 'hello world'
 
 
@@ -114,5 +116,5 @@ async def douyin(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # client.run_until_disconnected()
 if __name__ == '__main__':
     app.run()
-    bot.add_handler(CommandHandler("start", start))
-    bot.add_handler(MessageHandler(filters.Regex(r'.*v\.douyin\.com.*'),douyin))
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(MessageHandler(filters.Regex(r'.*v\.douyin\.com.*'), douyin))

@@ -1,4 +1,4 @@
 aiohttp==3.9.1
-sanic
+sanic==20.12.6
 pyTelegramBotAPI==4.10.0
 Requests==2.31.0

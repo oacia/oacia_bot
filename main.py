@@ -36,7 +36,7 @@ async def index(request):
 async def callback(request):
     update = types.Update.de_json(request.json)
     await bot.process_new_updates([update])
-    time.sleep(2)
+    time.sleep(10)
     return text("ok")
 # with open(f"secret/config.json", "r") as file:
 #     credentials = json.loads(file.read())
@@ -105,13 +105,21 @@ async def pics(surl, message:types.Message):
     #update.message.reply_text(f"{len(images)} picture downloading...")
     #await event.reply(f"{len(images)} picture downloading...")
     for i, im in enumerate(images):
-        p_req = requests.get(url=im['url_list'][0])
-        photo = BytesIO()
-        photo.name = 'photo.jpg'
-        for data in p_req.iter_content(chunk_size=1024):
-            photo.write(data)
-        photo.seek(0, 0)
-        await bot.send_photo(message.chat.id,photo)
+        async with aiohttp.ClientSession() as client:
+            async with client.get(im['url_list'][0]) as response:
+                p_req = await response.read()
+                photo = BytesIO(p_req)
+                photo.name = 'photo.jpg'
+                await bot.send_photo(message.chat.id, photo)
+        # p_req = requests.get(url=im['url_list'][0])
+        # photo = BytesIO()
+        # photo.name = 'photo.jpg'
+        # for data in p_req.iter_content(chunk_size=1024):
+        #     photo.write(data)
+        # photo.seek(0, 0)
+        # await bot.send_photo(message.chat.id,photo)
+
+
         #print(f"{user}: [send] {im['url_list'][0]}")
         #loop = asyncio.get_event_loop()
         #loop.run_until_complete(asyncio.wait(asyncio.ensure_future()))
@@ -120,7 +128,7 @@ async def pics(surl, message:types.Message):
 
 
 #@client.on(events.NewMessage(pattern='/start'))
-@bot.message_handler(command=['/start'])
+@bot.message_handler(command=['start'])
 async def start(message:types.Message):
     response = f"hello! {message.chat.username}"
     response += '''

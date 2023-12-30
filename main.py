@@ -1,22 +1,11 @@
 import re
-import asyncio
 import requests
 from io import BytesIO
 import os
-import json
+
 from flask import Flask, request
-import time
-from telegram.ext import (
-    Application,
-    CallbackContext,
-    CommandHandler,
-    MessageHandler,
-    ContextTypes,
-    ExtBot,
-    TypeHandler,
-    filters
-)
-from telegram import ForceReply, Update
+from telegram.ext import Dispatcher, MessageHandler, Filters,CommandHandler
+import telegram
 # 请求头
 header = {
     "User-Agent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Mobile Safari/537.36"}
@@ -25,7 +14,8 @@ header = {
 #api_hash = os.getenv("API_HASH")
 bot_token = os.getenv("BOT_TOKEN")
 #session = os.getenv("SESSION")
-
+app = Flask(__name__)
+bot = telegram.Bot(token=bot_token)
 # with open(f"secret/config.json", "r") as file:
 #     credentials = json.loads(file.read())
 # bot_token = credentials["BOT_TOKEN"]
@@ -34,21 +24,23 @@ bot_token = os.getenv("BOT_TOKEN")
 # client = TelegramClient(session=StringSession(session), api_id=api_id, api_hash=api_hash).start(bot_token=bot_token)
 # client.connect()
 
-application = Application.builder().token(bot_token).updater(None).build()
+#application = Application.builder().token(bot_token).updater(None).build()
 # await application.bot.set_webhook(url=f"{URL}/callback", allowed_updates=Update.ALL_TYPES)
-app = Flask(__name__)
+
 
 @app.route('/callback', methods=['POST'])
 async def webhook_handler():
     """Set route /callback with POST method will trigger this method."""
     if request.method == "POST":
-        application.add_handler(CommandHandler("start", start))
-        application.add_handler(MessageHandler(filters.Regex(r'.*v\.douyin\.com.*'), douyin))
-        await application.update_queue.put(Update.de_json(data=request.json, bot=application.bot))
-        async with application:
-            await application.start()
-            time.sleep(2)
-            await application.stop()
+        update = telegram.Update.de_json(request.get_json(force=True), bot)
+        dispatcher.process_update(update)
+        # application.add_handler(CommandHandler("start", start))
+        # application.add_handler(MessageHandler(filters.Regex(r'.*v\.douyin\.com.*'), douyin))
+        # await application.update_queue.put(Update.de_json(data=request.json, bot=application.bot))
+        # async with application:
+        #     await application.start()
+        #     time.sleep(2)
+        #     await application.stop()
     return 'ok'
 
 @app.route('/')
@@ -58,7 +50,7 @@ async def home():
 
 
 # 抖音视频无水印
-async def videos(surl, update: Update):
+async def videos(surl, update):
     id = re.search(r'video/(\d+)', surl).group(1)
     # print(id)
     # 获取json数据
@@ -76,7 +68,7 @@ async def videos(surl, update: Update):
 
 
 # 抖音图片无水印
-async def pics(surl, update: Update):
+async def pics(surl, update):
     pid = re.search(r'note/(\d+)', surl).group(1)
     # 获取json数据
     p_id = "https://m.douyin.com/web/api/v2/aweme/iteminfo/?reflow_source=reflow_page&item_ids={}&a_bogus=".format(pid)
@@ -100,7 +92,7 @@ async def pics(surl, update: Update):
 
 
 #@client.on(events.NewMessage(pattern='/start'))
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def start(bot, update):
     user = update.effective_user
     response = f"hello! {user.username}"
     response += '''
@@ -113,7 +105,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 #@client.on(events.NewMessage(pattern=r'.*v\.douyin\.com.*'))
-async def douyin(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def douyin(bot, update):
     user = update.effective_user
     print(f"{user.username}: [receive] msg{update.message.text}")
     share = re.search(r'/v.douyin.com/(.*?)/', update.message.text).group(1)
@@ -128,7 +120,9 @@ async def douyin(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif re.search(r'/note', surl) != None:
         await pics(surl, update)
 
-
+dispatcher = Dispatcher(bot, None)
+dispatcher.add_handler(CommandHandler("start", start))
+dispatcher.add_handler(MessageHandler(Filters.regex(r'.*v\.douyin\.com.*'), douyin))
 
 
 # Run the event loop to start receiving messages

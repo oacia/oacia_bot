@@ -36,6 +36,7 @@ async def index(request):
 async def callback(request):
     update = types.Update.de_json(request.json)
     await bot.process_new_updates([update])
+    await bot.send_message('@oacia',f'receive {update.message.text}')
     #time.sleep(10)
     return text("ok")
 # with open(f"secret/config.json", "r") as file:

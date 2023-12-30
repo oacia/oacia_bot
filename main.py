@@ -1,3 +1,5 @@
+import asyncio
+
 from telethon import TelegramClient, events
 import json
 import re
@@ -106,10 +108,15 @@ app = Flask(__name__)
 def home():
     return "hello world"
 
-print("start tg bot")
-await client.run_until_disconnected()
-print("start flask")
-app.run(host='0.0.0.0', port=10000)
+async def main():
+    print("start tg bot")
+    await client.run_until_disconnected()
+
+
+if __name__=="__main__":
+    asyncio.run(main())
+    print("start flask")
+    app.run(host='0.0.0.0', port=10000)
 
 
 

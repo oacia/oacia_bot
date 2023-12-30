@@ -1,5 +1,6 @@
 aiohttp==3.9.1
+fastapi==0.108.0
 Flask==3.0.0
 Requests==2.31.0
 Telethon==1.33.1
-tqdm==4.66.1
+uvicorn==0.25.0

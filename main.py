@@ -8,14 +8,20 @@ from io import BytesIO
 # 请求头
 header = {
     "User-Agent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Mobile Safari/537.36"}
-with open("secret/config.json", "r") as file:
-    config = json.loads(file.read())
+# with open("secret/config.json", "r") as file:
+#     config = json.loads(file.read())
+#
+# api_id = config["API_ID"]
+# api_hash = config["API_HASH"]
+# bot_token = config["BOT_TOKEN"]
+# session = config["SESSION"]
+# proxy = config["PROXY"]
 
-api_id = config["API_ID"]
-api_hash = config["API_HASH"]
-bot_token = config["BOT_TOKEN"]
-session = config["SESSION"]
-proxy = config["PROXY"]
+api_id = int(os.getenv("API_ID"))
+api_hash = os.getenv("API_HASH")
+bot_token = os.getenv("BOT_TOKEN")
+session = "oacia_bot"
+proxy = None
 client = TelegramClient(session, api_id, api_hash, proxy=proxy).start(bot_token=bot_token)
 
 

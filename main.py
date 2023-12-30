@@ -1,10 +1,20 @@
 import re
+import asyncio
 import requests
 from io import BytesIO
 import os
 import json
 from flask import Flask, request
-from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters,StringRegexHandler
+from telegram.ext import (
+    Application,
+    CallbackContext,
+    CommandHandler,
+    MessageHandler,
+    ContextTypes,
+    ExtBot,
+    TypeHandler,
+    filters
+)
 from telegram import ForceReply, Update
 # 请求头
 header = {
@@ -18,26 +28,12 @@ bot_token = os.getenv("BOT_TOKEN")
 # with open(f"secret/config.json", "r") as file:
 #     credentials = json.loads(file.read())
 # bot_token = credentials["BOT_TOKEN"]
-app = Flask(__name__)
-application = Application.builder().token(bot_token).build()
+
 
 # client = TelegramClient(session=StringSession(session), api_id=api_id, api_hash=api_hash).start(bot_token=bot_token)
 # client.connect()
 
-@app.route('/callback', methods=['POST'])
-async def webhook_handler():
-    """Set route /callback with POST method will trigger this method."""
-    if request.method == "POST":
-        await application.update_queue.put(Update.de_json(data=request.get_json(force=True), bot=application.bot))
-        async with application:
-            await application.start()
-            await application.stop()
-    return 'ok'
 
-
-@app.route('/')
-async def home():
-    return 'hello world'
 
 
 # 抖音视频无水印
@@ -111,10 +107,34 @@ async def douyin(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif re.search(r'/note', surl) != None:
         await pics(surl, update)
 
+async def main():
+    application = Application.builder().token(bot_token).updater(None).build()
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(MessageHandler(filters.Regex(r'.*v\.douyin\.com.*'), douyin))
+    #await application.bot.set_webhook(url=f"{URL}/callback", allowed_updates=Update.ALL_TYPES)
+    app = Flask(__name__)
+
+    @app.route('/callback', methods=['POST'])
+    async def webhook_handler():
+        """Set route /callback with POST method will trigger this method."""
+        if request.method == "POST":
+            await application.update_queue.put(Update.de_json(data=request.json, bot=application.bot))
+        return 'ok'
+
+    @app.route('/')
+    async def home():
+        return 'hello world'
+
+    app.run()
+    async with application:
+        await application.start()
+        await application.stop()
+
+
+
 
 # Run the event loop to start receiving messages
 # client.run_until_disconnected()
 if __name__ == '__main__':
-    app.run()
-    application.add_handler(CommandHandler("start", start))
-    application.add_handler(MessageHandler(filters.Regex(r'.*v\.douyin\.com.*'), douyin))
+    asyncio.run(main())
+

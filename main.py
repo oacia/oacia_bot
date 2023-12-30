@@ -36,7 +36,7 @@ async def index(request):
 async def callback(request):
     update = types.Update.de_json(request.json)
     await bot.process_new_updates([update])
-    time.sleep(10)
+    #time.sleep(10)
     return text("ok")
 # with open(f"secret/config.json", "r") as file:
 #     credentials = json.loads(file.read())
@@ -128,7 +128,7 @@ async def pics(surl, message:types.Message):
 
 
 #@client.on(events.NewMessage(pattern='/start'))
-@bot.message_handler(command=['start'])
+@bot.message_handler(commands=['start'])
 async def start(message:types.Message):
     response = f"hello! {message.chat.username}"
     response += '''

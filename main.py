@@ -102,15 +102,19 @@ from flask import Flask
 
 app = Flask(__name__)
 
-
+bot_state = False
 @app.route('/')
 def home():
-    return "hello world"
+    global bot_state
+    if not bot_state:
+        bot_state = True
+        # Run the event loop to start receiving messages
+        print("start bot server")
+        client.run_until_disconnected()
 
-# Run the event loop to start receiving messages
-client.run_until_disconnected()
-print("tg bot server start successfully")
+
+print("start flask server")
 app.run(host='0.0.0.0', port=10000)
-print("flask server start successfully")
+
 
 

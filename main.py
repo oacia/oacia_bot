@@ -132,7 +132,7 @@ async def pics(surl, message:types.Message):
 async def start(message:types.Message):
     response = f"hello! {message.chat.username}"
     response += '''
-    this is a bot create by oacia
+    this is a bot create by oacia~
     you can:
     1 - download douyin vedio or pictures by sending a shared link
     

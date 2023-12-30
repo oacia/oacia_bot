@@ -108,7 +108,7 @@ def home():
     return "hello world"
 
 
-app.run()
+app.run(host='0.0.0.0', port=10000)
 
 # Run the event loop to start receiving messages
 client.run_until_disconnected()

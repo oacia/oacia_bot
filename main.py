@@ -33,6 +33,7 @@ async def callback():
     update = telebot.types.Update.de_json(
         request.stream.read().decode("utf-8"))
     await bot.process_new_updates([update])
+    await asyncio.sleep(10)
     return "ok"
 # with open(f"secret/config.json", "r") as file:
 #     credentials = json.loads(file.read())

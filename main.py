@@ -6,8 +6,8 @@ import asyncio
 # from flask import Flask, request
 from sanic import Sanic
 from sanic.response import json
-from telebot.async_telebot import AsyncTeleBot
-import telebot
+from telebot.async_telebot import AsyncTeleBot,types
+#import telebot
 import aiohttp
 # 请求头
 header = {
@@ -32,7 +32,7 @@ async def index(request):
 
 @app.route('/callback', methods=['POST'])
 async def callback(request):
-    update = telebot.types.Update.de_json(request.json)
+    update = types.Update.de_json(request.json)
     await bot.process_new_updates([update])
     await asyncio.sleep(2)
     return "ok"
@@ -70,7 +70,7 @@ async def callback(request):
 
 
 # 抖音视频无水印
-async def videos(surl, message:telebot.types.Message):
+async def videos(surl, message:types.Message):
     id = re.search(r'video/(\d+)', surl).group(1)
     # print(id)
     # 获取json数据
@@ -90,7 +90,7 @@ async def videos(surl, message:telebot.types.Message):
 
 
 # 抖音图片无水印
-async def pics(surl, message:telebot.types.Message):
+async def pics(surl, message:types.Message):
     pid = re.search(r'note/(\d+)', surl).group(1)
     # 获取json数据
     p_id = "https://m.douyin.com/web/api/v2/aweme/iteminfo/?reflow_source=reflow_page&item_ids={}&a_bogus=".format(pid)
@@ -119,7 +119,7 @@ async def pics(surl, message:telebot.types.Message):
 
 #@client.on(events.NewMessage(pattern='/start'))
 @bot.message_handler(command=['/start'])
-async def start(message:telebot.types.Message):
+async def start(message:types.Message):
     response = f"hello! {message.chat.username}"
     response += '''
     this is a bot create by oacia
@@ -132,7 +132,7 @@ async def start(message:telebot.types.Message):
 
 #@client.on(events.NewMessage(pattern=r'.*v\.douyin\.com.*'))
 @bot.message_handler(regexp=r'.*v\.douyin\.com.*')
-async def douyin(message:telebot.types.Message):
+async def douyin(message:types.Message):
     #print(f"{user.username}: [receive] msg{update.message.text}")
     share = re.search(r'/v.douyin.com/(.*?)/', message.text).group(1)
     # 请求链接

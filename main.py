@@ -116,7 +116,7 @@ async def pics(surl, message:telebot.types.Message):
 
 
 #@client.on(events.NewMessage(pattern='/start'))
-@bot.message_handlers(command=['/start'])
+@bot.message_handler(command=['/start'])
 async def start(message:telebot.types.Message):
     response = f"hello! {message.chat.username}"
     response += '''
@@ -129,7 +129,7 @@ async def start(message:telebot.types.Message):
 
 
 #@client.on(events.NewMessage(pattern=r'.*v\.douyin\.com.*'))
-@bot.message_handlers(regexp=r'.*v\.douyin\.com.*')
+@bot.message_handler(regexp=r'.*v\.douyin\.com.*')
 async def douyin(message:telebot.types.Message):
     #print(f"{user.username}: [receive] msg{update.message.text}")
     share = re.search(r'/v.douyin.com/(.*?)/', message.text).group(1)

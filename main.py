@@ -102,7 +102,7 @@ async def pics(surl, message:types.Message):
     # print(p_rs)
     # 拿到images下的原图片
     images = p_rs['item_list'][0]['images']
-    await bot.send_message(message.chat.id,f"{len(images)} picture downloading...")
+    await bot.send_message(message.chat.id,f"{len(images)} picture downloading...{message.chat.id}")
     #update.message.reply_text(f"{len(images)} picture downloading...")
     #await event.reply(f"{len(images)} picture downloading...")
     for i, im in enumerate(images):

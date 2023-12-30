@@ -33,6 +33,25 @@ bot_token = os.getenv("BOT_TOKEN")
 # client = TelegramClient(session=StringSession(session), api_id=api_id, api_hash=api_hash).start(bot_token=bot_token)
 # client.connect()
 
+application = Application.builder().token(bot_token).updater(None).build()
+# await application.bot.set_webhook(url=f"{URL}/callback", allowed_updates=Update.ALL_TYPES)
+app = Flask(__name__)
+
+@app.route('/callback', methods=['POST'])
+async def webhook_handler():
+    """Set route /callback with POST method will trigger this method."""
+    if request.method == "POST":
+        application.add_handler(CommandHandler("start", start))
+        application.add_handler(MessageHandler(filters.Regex(r'.*v\.douyin\.com.*'), douyin))
+        await application.update_queue.put(Update.de_json(data=request.json, bot=application.bot))
+        async with application:
+            await application.start()
+            await application.stop()
+    return 'ok'
+
+@app.route('/')
+async def home():
+    return 'hello world'
 
 
 
@@ -107,34 +126,10 @@ async def douyin(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif re.search(r'/note', surl) != None:
         await pics(surl, update)
 
-async def main():
-    application = Application.builder().token(bot_token).updater(None).build()
-    application.add_handler(CommandHandler("start", start))
-    application.add_handler(MessageHandler(filters.Regex(r'.*v\.douyin\.com.*'), douyin))
-    #await application.bot.set_webhook(url=f"{URL}/callback", allowed_updates=Update.ALL_TYPES)
-    app = Flask(__name__)
-
-    @app.route('/callback', methods=['POST'])
-    async def webhook_handler():
-        """Set route /callback with POST method will trigger this method."""
-        if request.method == "POST":
-            await application.update_queue.put(Update.de_json(data=request.json, bot=application.bot))
-        return 'ok'
-
-    @app.route('/')
-    async def home():
-        return 'hello world'
-
-    app.run()
-    async with application:
-        await application.start()
-        await application.stop()
-
 
 
 
 # Run the event loop to start receiving messages
 # client.run_until_disconnected()
 if __name__ == '__main__':
-    asyncio.run(main())
-
+    app.run()

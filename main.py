@@ -1,8 +1,8 @@
-
 import re
 import requests
 from io import BytesIO
 import os
+import json
 from flask import Flask, request
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters,StringRegexHandler
 from telegram import ForceReply, Update
@@ -10,11 +10,14 @@ from telegram import ForceReply, Update
 header = {
     "User-Agent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Mobile Safari/537.36"}
 
-api_id = int(os.getenv("API_ID"))
-api_hash = os.getenv("API_HASH")
-bot_token = os.getenv("BOT_TOKEN")
-session = os.getenv("SESSION")
+#api_id = int(os.getenv("API_ID"))
+#api_hash = os.getenv("API_HASH")
+#bot_token = os.getenv("BOT_TOKEN")
+#session = os.getenv("SESSION")
 
+with open(f"secret/config.json", "r") as file:
+    credentials = json.loads(file.read())
+bot_token = credentials["BOT_TOKEN"]
 app = Flask(__name__)
 bot = Application.builder().token(bot_token).build()
 
@@ -22,11 +25,11 @@ bot = Application.builder().token(bot_token).build()
 # client.connect()
 
 @app.route('/callback', methods=['POST'])
-def webhook_handler():
+async def webhook_handler():
     """Set route /callback with POST method will trigger this method."""
     if request.method == "POST":
         update = Update.de_json(request.get_json(force=True), bot)
-        bot.process_update(update)
+        await bot.process_update(update)
     return 'ok'
 
 

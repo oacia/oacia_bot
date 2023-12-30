@@ -1,4 +1,6 @@
 import re
+import time
+
 import requests
 from io import BytesIO
 import os
@@ -34,7 +36,7 @@ async def index(request):
 async def callback(request):
     update = types.Update.de_json(request.json)
     await bot.process_new_updates([update])
-    await asyncio.sleep(2)
+    time.sleep(2)
     return text("ok")
 # with open(f"secret/config.json", "r") as file:
 #     credentials = json.loads(file.read())

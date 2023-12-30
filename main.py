@@ -1,5 +1,5 @@
 import asyncio
-
+import aiohttp
 from telethon import TelegramClient, events
 import json
 import re
@@ -43,36 +43,27 @@ async def videos(surl, user):
     req = v_rs['item_list'][0]['video']['play_addr']['uri']
     # 下载无水印视频
     v_url = "https://www.douyin.com/aweme/v1/play/?video_id={}".format(req)
-    print(f"send douyin/video/{req}.mp4 to {user}")
+    await client.send_message(user,f"1 vedio sending...")
     await client.send_file(user, v_url, vedio_note=True)
 
 
 # 抖音图片无水印
 async def pics(surl, user):
-    # 获取id
-    # if len(surl) > 60:
-    #     pid = re.search(r'note/(\d.*)/', surl).group(1)
-    # else:
-    #     pid = re.search(r'note/(\d.*)', surl).group(1)
     pid = re.search(r'note/(\d+)', surl).group(1)
-    # if pid:
-    #     pid = pid.group(1)
-    # 获取json数据
     p_id = "https://m.douyin.com/web/api/v2/aweme/iteminfo/?reflow_source=reflow_page&item_ids={}&a_bogus=".format(pid)
-    # print(p_id)
     p_rs = requests.get(url=p_id, headers=header).json()
-    # print(p_rs)
     # 拿到images下的原图片
     images = p_rs['item_list'][0]['images']
+    await client.send_message(user,f"{len(images)} photos sending...")
     for i, im in enumerate(images):
-        p_req = requests.get(url=im['url_list'][0])
-        photo = BytesIO()
-        photo.name = 'photo.jpg'
-        for data in p_req.iter_content(chunk_size=1024):
-            photo.write(data)
-        photo.seek(0, 0)
-        print(f"{user}: [send] {im['url_list'][0]}")
-        await client.send_file(user, photo)
+        async with aiohttp.ClientSession() as session:
+            async with session.get(im['url_list'][0]) as p_req:
+                photo = BytesIO()
+                photo.name = 'photo.jpg'
+                photo.write(p_req.read())
+                photo.seek(0, 0)
+                await client.send_file(user, photo)
+
 
 
 @client.on(events.NewMessage(pattern='/start'))

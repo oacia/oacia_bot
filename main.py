@@ -3,7 +3,9 @@ import requests
 from io import BytesIO
 import os
 import asyncio
-from flask import Flask, request
+# from flask import Flask, request
+from sanic import Sanic
+from sanic.response import json
 from telebot.async_telebot import AsyncTeleBot
 import telebot
 import aiohttp
@@ -15,7 +17,7 @@ header = {
 #api_hash = os.getenv("API_HASH")
 bot_token = os.getenv("BOT_TOKEN")
 #session = os.getenv("SESSION")
-app = Flask(__name__)
+app = Sanic(__name__)
 bot = AsyncTeleBot(token=bot_token)
 @app.route("/")
 async def index():
@@ -29,9 +31,8 @@ async def index():
     # return render_template("index.html", hello=hello, content=content)
 
 @app.route('/callback', methods=['POST'])
-async def callback():
-    update = telebot.types.Update.de_json(
-        request.stream.read().decode("utf-8"))
+async def callback(request):
+    update = telebot.types.Update.de_json(request.json)
     await bot.process_new_updates([update])
     await asyncio.sleep(2)
     return "ok"

@@ -46,7 +46,7 @@ async def webhook_handler():
         await application.update_queue.put(Update.de_json(data=request.json, bot=application.bot))
         async with application:
             await application.start()
-            await application.stop()
+            #await application.stop()
     return 'ok'
 
 @app.route('/')

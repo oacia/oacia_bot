@@ -20,7 +20,7 @@ bot_token = os.getenv("BOT_TOKEN")
 app = Sanic(__name__)
 bot = AsyncTeleBot(token=bot_token)
 @app.route("/")
-async def index():
+async def index(request):
     return 'hello world'
     # bot.remove_webhook()
     # time.sleep(1)

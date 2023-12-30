@@ -18,7 +18,7 @@ bot_token = os.getenv("BOT_TOKEN")
 app = Flask(__name__)
 bot = AsyncTeleBot(token=bot_token)
 @app.route("/")
-def index():
+async def index():
     return 'hello world'
     # bot.remove_webhook()
     # time.sleep(1)
@@ -29,10 +29,10 @@ def index():
     # return render_template("index.html", hello=hello, content=content)
 
 @app.route('/callback', methods=['POST'])
-def callback():
+async def callback():
     update = telebot.types.Update.de_json(
         request.stream.read().decode("utf-8"))
-    bot.process_new_updates([update])
+    await bot.process_new_updates([update])
     return "ok"
 # with open(f"secret/config.json", "r") as file:
 #     credentials = json.loads(file.read())

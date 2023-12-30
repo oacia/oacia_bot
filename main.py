@@ -11,7 +11,7 @@ from io import BytesIO
 header = {
     "User-Agent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Mobile Safari/537.36"}
 
-DEBUG = False
+DEBUG = True
 
 if not DEBUG:
     api_id = int(os.getenv("API_ID"))
@@ -43,7 +43,7 @@ async def videos(surl, user):
     req = v_rs['item_list'][0]['video']['play_addr']['uri']
     # 下载无水印视频
     v_url = "https://www.douyin.com/aweme/v1/play/?video_id={}".format(req)
-    await client.send_message(user,f"1 vedio sending...")
+    await client.send_message(user, f"1 vedio sending...")
     await client.send_file(user, v_url, vedio_note=True)
 
 
@@ -54,23 +54,34 @@ async def pics(surl, user):
     p_rs = requests.get(url=p_id, headers=header).json()
     # 拿到images下的原图片
     images = p_rs['item_list'][0]['images']
-    await client.send_message(user,f"{len(images)} photos sending...")
+    await client.send_message(user, f"{len(images)} photos sending...")
+    photos = []
     for i, im in enumerate(images):
         async with aiohttp.ClientSession() as session:
-            async with session.get(im['url_list'][0]) as p_req:
-                photo = BytesIO()
-                photo.name = 'photo.jpg'
-                photo.write(p_req.read())
-                photo.seek(0, 0)
-                await client.send_file(user, photo)
-
+            async with session.get(im['url_list'][0]) as response:
+                if response.status == 200:
+                    photo = BytesIO()
+                    photo.name = f'{photo}.jpg'
+                    buffer = await response.read()
+                    photo.write(buffer)
+                    photo.seek(0, 0)
+                    await client.send_file(user, photo)
 
 
 @client.on(events.NewMessage(pattern='/start'))
 async def start(event):
     sender = await client.get_entity(event.peer_id.user_id)
-    response = f"hello!{sender.username}, this is a bot create by oacia\nyou can view source code at https://github.com/oacia/oacia_bot"
-    response += f"\nyou can download douyin vedio or pictures by sending a shared link"
+    response = f"hello!{sender.username}, this is a bot create by oacia"
+    response+='''
+    now the bot has these features:
+        - download douyin vedio or pictures by sending a shared link
+     
+    source code: https://github.com/oacia/oacia_bot
+    tutorial is writing now...please wait a few days~
+    then you can deploy this bot by yourself~
+    have a good time!
+    
+    '''
     await event.reply(response)
 
 
@@ -82,21 +93,23 @@ async def readMessages(event):
     if share:
         share = share.group(1)
     else:
-        event.reply("not a vaild douyin link")
+        event.reply("not a vaild douyin share link")
     # 请求链接
     share_url = "https://v.douyin.com/{}/".format(share)
     s_html = requests.get(url=share_url, headers=header)
     # 获取重定向后的视频id
     surl = s_html.url
-    if re.search(r'/video', surl) != None:
+    if re.search(r'/video', surl) is not None:
         await videos(surl, user.username)
         # 判断链接类型为图集分享类型
-    elif re.search(r'/note', surl) != None:
+    elif re.search(r'/note', surl) is not None:
         await pics(surl, user.username)
 
 
 import subprocess
-#在render部署需要一个端口开放http服务,否则部署将会失败
+
+
+# 在render部署需要一个端口开放http服务,否则部署将会失败
 def run_flask():
     subprocess.Popen(["python", "for_render.py"])
 

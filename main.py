@@ -5,6 +5,7 @@ from io import BytesIO
 import os
 import json
 from flask import Flask, request
+import time
 from telegram.ext import (
     Application,
     CallbackContext,
@@ -46,7 +47,8 @@ async def webhook_handler():
         await application.update_queue.put(Update.de_json(data=request.json, bot=application.bot))
         async with application:
             await application.start()
-            #await application.stop()
+            time.sleep(2)
+            await application.stop()
     return 'ok'
 
 @app.route('/')

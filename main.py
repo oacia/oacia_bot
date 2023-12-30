@@ -98,20 +98,18 @@ async def readMessages(event):
 
 
 # render必须得起一个http服务,否则就会断开连接....
-from fastapi import FastAPI
-import uvicorn
+from flask import Flask
 
-app = FastAPI()
+app = Flask(__name__)
 
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
+@app.route('/')
+def home():
+    return "hello world"
 
-if __name__ == "__main__":
-    print("start uvicorn service")
-    uvicorn.run(app, host="0.0.0.0", port=10000)
-    print("start tg bot service")
-    client.run_until_disconnected()
+print("start tg bot")
+await client.run_until_disconnected()
+print("start flask")
+app.run(host='0.0.0.0', port=10000)
 
 
 

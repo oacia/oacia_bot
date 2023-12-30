@@ -72,7 +72,7 @@ async def pics(surl, user):
 async def start(event):
     sender = await client.get_entity(event.peer_id.user_id)
     response = f"hello!{sender.username}, this is a bot create by oacia\nyou can view source code at https://github.com/oacia/oacia_bot"
-    response+=f"\nyou can download douyin vedio or pictures by sending a shared link"
+    response += f"\nyou can download douyin vedio or pictures by sending a shared link"
     await event.reply(response)
 
 
@@ -96,6 +96,19 @@ async def readMessages(event):
     elif re.search(r'/note', surl) != None:
         await pics(surl, user.username)
 
+
+# render必须得起一个http服务,否则就会断开连接....
+from flask import Flask
+
+app = Flask(__name__)
+
+
+@app.route('/')
+def home():
+    return "hello world"
+
+
+app.run()
 
 # Run the event loop to start receiving messages
 client.run_until_disconnected()

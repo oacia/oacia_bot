@@ -5,7 +5,7 @@ import os
 import asyncio
 # from flask import Flask, request
 from sanic import Sanic
-from sanic.response import json
+from sanic.response import text
 from telebot.async_telebot import AsyncTeleBot,types
 #import telebot
 import aiohttp
@@ -21,7 +21,7 @@ app = Sanic(__name__)
 bot = AsyncTeleBot(token=bot_token)
 @app.route("/")
 async def index(request):
-    return 'hello world'
+    return text('hello world')
     # bot.remove_webhook()
     # time.sleep(1)
     # bot.set_webhook(url=os.getenv("URL"))
@@ -35,7 +35,7 @@ async def callback(request):
     update = types.Update.de_json(request.json)
     await bot.process_new_updates([update])
     await asyncio.sleep(2)
-    return "ok"
+    return text("ok")
 # with open(f"secret/config.json", "r") as file:
 #     credentials = json.loads(file.read())
 # bot_token = credentials["BOT_TOKEN"]

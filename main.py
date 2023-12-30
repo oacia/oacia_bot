@@ -12,12 +12,12 @@ header = {
 
 #api_id = int(os.getenv("API_ID"))
 #api_hash = os.getenv("API_HASH")
-#bot_token = os.getenv("BOT_TOKEN")
+bot_token = os.getenv("BOT_TOKEN")
 #session = os.getenv("SESSION")
 
-with open(f"secret/config.json", "r") as file:
-    credentials = json.loads(file.read())
-bot_token = credentials["BOT_TOKEN"]
+# with open(f"secret/config.json", "r") as file:
+#     credentials = json.loads(file.read())
+# bot_token = credentials["BOT_TOKEN"]
 app = Flask(__name__)
 bot = Application.builder().token(bot_token).build()
 

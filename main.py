@@ -107,8 +107,10 @@ app = Flask(__name__)
 def home():
     return "hello world"
 
-
-app.run(host='0.0.0.0', port=10000)
-
 # Run the event loop to start receiving messages
 client.run_until_disconnected()
+print("tg bot server start successfully")
+app.run(host='0.0.0.0', port=10000)
+print("flask server start successfully")
+
+

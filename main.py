@@ -11,21 +11,23 @@ from io import BytesIO
 header = {
     "User-Agent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Mobile Safari/537.36"}
 
+DEBUG = True
 
-api_id = int(os.getenv("API_ID"))
-api_hash = os.getenv("API_HASH")
-bot_token = os.getenv("BOT_TOKEN")
-session = "oacia_bot"
-proxy = None
+if not DEBUG:
+    api_id = int(os.getenv("API_ID"))
+    api_hash = os.getenv("API_HASH")
+    bot_token = os.getenv("BOT_TOKEN")
+    session = "oacia_bot"
+    proxy = None
+else:
+    with open("secret/config.json", "r") as file:
+        config = json.loads(file.read())
 
-# with open("secret/config.json", "r") as file:
-#     config = json.loads(file.read())
-#
-# api_id = config["API_ID"]
-# api_hash = config["API_HASH"]
-# bot_token = config["BOT_TOKEN"]
-# session = config["SESSION"]
-# proxy = config["PROXY"]
+    api_id = config["API_ID"]
+    api_hash = config["API_HASH"]
+    bot_token = config["BOT_TOKEN"]
+    session = config["SESSION"]
+    proxy = config["PROXY"]
 
 client = TelegramClient(session, api_id, api_hash, proxy=proxy).start(bot_token=bot_token)
 
@@ -101,9 +103,15 @@ async def readMessages(event):
     elif re.search(r'/note', surl) != None:
         await pics(surl, user.username)
 
-client.run_until_disconnected()
+
+import subprocess
+#在render部署需要一个端口开放http服务,否则部署将会失败
+def run_flask():
+    subprocess.Popen(["python", "for_render.py"])
 
 
-
-
-
+if __name__ == "__main__":
+    print("for_render.py start")
+    run_flask()
+    print('tg bot start')
+    client.run_until_disconnected()

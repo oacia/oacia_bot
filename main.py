@@ -2,7 +2,7 @@ import re
 import requests
 from io import BytesIO
 import os
-
+import asyncio
 from flask import Flask, request
 from telegram.ext import Dispatcher, MessageHandler, Filters,CommandHandler
 import telegram
@@ -79,7 +79,6 @@ def pics(surl, update):
     images = p_rs['item_list'][0]['images']
     update.message.reply_text(f"{len(images)} picture downloading...")
     #await event.reply(f"{len(images)} picture downloading...")
-    photos = []
     for i, im in enumerate(images):
         p_req = requests.get(url=im['url_list'][0])
         photo = BytesIO()
@@ -87,9 +86,10 @@ def pics(surl, update):
         for data in p_req.iter_content(chunk_size=1024):
             photo.write(data)
         photo.seek(0, 0)
-        photos.append(photo)
         #print(f"{user}: [send] {im['url_list'][0]}")
-    update.message.reply_photo(photos)
+        #loop = asyncio.get_event_loop()
+        #loop.run_until_complete(asyncio.wait(asyncio.ensure_future()))
+        asyncio.run(update.message.reply_photo(photo))
         #await client.send_file(user, photo)
 
 

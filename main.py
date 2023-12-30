@@ -1,15 +1,11 @@
 import re
-import time
-
 import requests
 from io import BytesIO
 import os
 import asyncio
-# from flask import Flask, request
-from sanic import Sanic
-from sanic.response import text
-from telebot.async_telebot import AsyncTeleBot,types
-#import telebot
+from flask import Flask, request
+from telebot.async_telebot import AsyncTeleBot
+import telebot
 import aiohttp
 # 请求头
 header = {
@@ -19,11 +15,11 @@ header = {
 #api_hash = os.getenv("API_HASH")
 bot_token = os.getenv("BOT_TOKEN")
 #session = os.getenv("SESSION")
-app = Sanic(__name__)
+app = Flask(__name__)
 bot = AsyncTeleBot(token=bot_token)
 @app.route("/")
-async def index(request):
-    return text('hello world')
+def index():
+    return 'hello world'
     # bot.remove_webhook()
     # time.sleep(1)
     # bot.set_webhook(url=os.getenv("URL"))
@@ -32,13 +28,12 @@ async def index(request):
     # content = modules.content()
     # return render_template("index.html", hello=hello, content=content)
 
-@app.route('/callback', methods=['POST'])
-async def callback(request):
-    update = types.Update.de_json(request.json)
-    await bot.process_new_updates([update])
-    await bot.send_message('@oacia',f'receive {update.message.text}')
-    #time.sleep(10)
-    return text("ok")
+@app.route('/webhook', methods=['POST'])
+def webhook():
+    update = telebot.types.Update.de_json(
+        request.stream.read().decode("utf-8"))
+    bot.process_new_updates([update])
+    return "ok"
 # with open(f"secret/config.json", "r") as file:
 #     credentials = json.loads(file.read())
 # bot_token = credentials["BOT_TOKEN"]
@@ -73,7 +68,7 @@ async def callback(request):
 
 
 # 抖音视频无水印
-async def videos(surl, message:types.Message):
+async def videos(surl, message:telebot.types.Message):
     id = re.search(r'video/(\d+)', surl).group(1)
     # print(id)
     # 获取json数据
@@ -93,7 +88,7 @@ async def videos(surl, message:types.Message):
 
 
 # 抖音图片无水印
-async def pics(surl, message:types.Message):
+async def pics(surl, message:telebot.types.Message):
     pid = re.search(r'note/(\d+)', surl).group(1)
     # 获取json数据
     p_id = "https://m.douyin.com/web/api/v2/aweme/iteminfo/?reflow_source=reflow_page&item_ids={}&a_bogus=".format(pid)
@@ -102,25 +97,17 @@ async def pics(surl, message:types.Message):
     # print(p_rs)
     # 拿到images下的原图片
     images = p_rs['item_list'][0]['images']
-    await bot.send_message(message.chat.id,f"{len(images)} picture downloading...{message.chat.id}")
+    await bot.send_message(message.chat.id,f"{len(images)} picture downloading...")
     #update.message.reply_text(f"{len(images)} picture downloading...")
     #await event.reply(f"{len(images)} picture downloading...")
     for i, im in enumerate(images):
-        async with aiohttp.ClientSession() as client:
-            async with client.get(im['url_list'][0]) as response:
-                p_req = await response.read()
-                photo = BytesIO(p_req)
-                photo.name = 'photo.jpg'
-                await bot.send_photo(message.chat.id, photo)
-        # p_req = requests.get(url=im['url_list'][0])
-        # photo = BytesIO()
-        # photo.name = 'photo.jpg'
-        # for data in p_req.iter_content(chunk_size=1024):
-        #     photo.write(data)
-        # photo.seek(0, 0)
-        # await bot.send_photo(message.chat.id,photo)
-
-
+        p_req = requests.get(url=im['url_list'][0])
+        photo = BytesIO()
+        photo.name = 'photo.jpg'
+        for data in p_req.iter_content(chunk_size=1024):
+            photo.write(data)
+        photo.seek(0, 0)
+        await bot.send_photo(message.chat.id,photo)
         #print(f"{user}: [send] {im['url_list'][0]}")
         #loop = asyncio.get_event_loop()
         #loop.run_until_complete(asyncio.wait(asyncio.ensure_future()))
@@ -129,11 +116,11 @@ async def pics(surl, message:types.Message):
 
 
 #@client.on(events.NewMessage(pattern='/start'))
-@bot.message_handler(commands=['start'])
-async def start(message:types.Message):
+@bot.message_handler(command=['/start'])
+async def start(message:telebot.types.Message):
     response = f"hello! {message.chat.username}"
     response += '''
-    this is a bot create by oacia~
+    this is a bot create by oacia
     you can:
     1 - download douyin vedio or pictures by sending a shared link
     
@@ -143,7 +130,7 @@ async def start(message:types.Message):
 
 #@client.on(events.NewMessage(pattern=r'.*v\.douyin\.com.*'))
 @bot.message_handler(regexp=r'.*v\.douyin\.com.*')
-async def douyin(message:types.Message):
+async def douyin(message:telebot.types.Message):
     #print(f"{user.username}: [receive] msg{update.message.text}")
     share = re.search(r'/v.douyin.com/(.*?)/', message.text).group(1)
     # 请求链接

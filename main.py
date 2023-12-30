@@ -30,26 +30,27 @@ api_hash = os.getenv("API_HASH")
 bot_token = os.getenv("BOT_TOKEN")
 session = os.getenv("SESSION")
 
-app = Flask(__name__)
+#app = Flask(__name__)
 
 client = TelegramClient(session=StringSession(session), api_id=api_id, api_hash=api_hash).start(bot_token=bot_token)
 client.connect()
 
-@app.route('/callback', methods=['POST'])
-async def webhook_handler():
-    """Set route /hook with POST method will trigger this method."""
-    # app.logger.info("receive message")
-    await client.send_message('oacia', "6666666")
-    if request.method == "POST":
-        app.logger.info(request.get_json(force=True))
-        await client.send_message('oacia', "12345678")
-        await client.send_message('oacia', request.get_json(force=True))
-    return 'ok'
+# @app.route('/callback', methods=['POST'])
+# def webhook_handler():
+#     """Set route /hook with POST method will trigger this method."""
+#     # app.logger.info("receive message")
+#     # client.send_message('oacia', "6666666")
+#     if request.method == "POST":
+#         app.logger.info(request.get_json(force=True))
+#         #client.
+#         # client.send_message('oacia', "12345678")
+#         # client.send_message('oacia', request.get_json(force=True))
+#     return 'ok'
 
 
-@app.route('/')
-def home():
-    return 'hello world'
+# @app.route('/')
+# def home():
+#     return 'hello world'
 
 
 # 抖音视频无水印
@@ -90,7 +91,7 @@ async def pics(surl, user, event):
         await client.send_file(user, photo)
 
 
-# @client.on(events.NewMessage(pattern='/start'))
+@client.on(events.NewMessage(pattern='/start'))
 async def start(event):
     sender = await client.get_entity(event.peer_id.user_id)
     response = f"hello! {sender.username}"
@@ -103,7 +104,7 @@ async def start(event):
     await event.reply(response)
 
 
-# @client.on(events.NewMessage(pattern=r'.*v\.douyin\.com.*'))
+@client.on(events.NewMessage(pattern=r'.*v\.douyin\.com.*'))
 async def readMessages(event):
     user = await client.get_entity(event.peer_id.user_id)
     print(f"{user.username}: [receive] msg{event.text}")
@@ -121,6 +122,6 @@ async def readMessages(event):
 
 
 # Run the event loop to start receiving messages
-# client.run_until_disconnected()
-if __name__ == '__main__':
-    app.run()
+client.run_until_disconnected()
+# if __name__ == '__main__':
+#     app.run()

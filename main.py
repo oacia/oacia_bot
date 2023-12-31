@@ -19,11 +19,13 @@ if not DEBUG:
     api_id = int(os.getenv("API_ID"))
     api_hash = os.getenv("API_HASH")
     bot_token = os.getenv("BOT_TOKEN")
+    render_name = os.getenv("RENDER_NAME")
     session = "oacia_bot"
     proxy = None
-    requests.post(f"https://api.telegram.org/bot{bot_token}/setWebhook?url=https://oacia-bot.onrender.com/webhook")
-    if requests.status_codes == 200:
-        print("set webhook successful")
+    if render_name:
+        requests.post(f"https://api.telegram.org/bot{bot_token}/setWebhook?url=https://{render_name}.onrender.com/webhook")
+        if requests.status_codes == 200:
+            print("set webhook successful")
 else:
     with open("secret/config.json", "r") as file:
         config = json.loads(file.read())
@@ -91,19 +93,20 @@ async def pics(surl, user):
 @client.on(events.NewMessage(pattern='/start'))
 async def start(event):
     sender = await client.get_entity(event.peer_id.user_id)
-    response = f"hello!{sender.username}, this is a bot create by oacia"
+    response = f"hello! {sender.username}, this is a bot create by oacia"
     response += '''
     now the bot has these features:
         - download douyin vedio or pictures by sending a shared link
-     
-    source code: https://github.com/oacia/oacia_bot
-    tutorial is writing now...please wait a few days~
-    then you can deploy this bot by yourself~
     have a good time!
+    
     
     '''
     await event.reply(response)
-
+    response = "source code: https://github.com/oacia/oacia_bot"
+    await event.reply(response)
+    response = '''tutorial: https://oacia.dev/telegram-bot-develop
+    you can deploy this bot by yourself~'''
+    await event.reply(response)
 
 @client.on(events.NewMessage(pattern=r'.*v\.douyin\.com.*'))
 async def readMessages(event):
@@ -130,6 +133,8 @@ import subprocess
 
 
 # 在render部署需要一个端口开放http服务,否则部署将会失败
+# 由于client.run_until_disconnected()和flask的app.run(host='0.0.0.0', port=10000)
+# 都会阻塞进程,而render只能运行一个python 命令,所以这是取巧的做法, but it works well
 def run_flask():
     subprocess.Popen(["python", "for_render.py"])
 

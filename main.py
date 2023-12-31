@@ -8,6 +8,7 @@ import os
 from io import BytesIO
 import random
 import string
+
 # 请求头
 header = {
     "User-Agent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Mobile Safari/537.36"}
@@ -20,6 +21,9 @@ if not DEBUG:
     bot_token = os.getenv("BOT_TOKEN")
     session = "oacia_bot"
     proxy = None
+    requests.post(f"https://api.telegram.org/bot{bot_token}/setWebhook?url=https://oacia-bot.onrender.com/webhook")
+    if requests.status_codes == 200:
+        print("set webhook successful")
 else:
     with open("secret/config.json", "r") as file:
         config = json.loads(file.read())
@@ -60,7 +64,7 @@ async def pics(surl, user):
         p_req = requests.get(url=im['url_list'][0])
         if p_req.status_code == 200:
             photo = BytesIO()
-            photo.name = f'{pid}_{i+1}.jpg'
+            photo.name = f'{pid}_{i + 1}.jpg'
             for data in p_req.iter_content(chunk_size=1024):
                 photo.write(data)
             photo.seek(0, 0)

@@ -6,8 +6,8 @@ I will add some imaginative features in the future(if I have some ideas :) )
 
 # feature
 
-* download douyin vedio and picture
+* download douyin vedios and pictures
 
-# free deploy yourself
+# deploy this bot by yourself for free
 
 see this tutorial https://oacia.dev/telegram-bot-develop

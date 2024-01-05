@@ -49,8 +49,8 @@ async def videos(surl, user):
     # 获取uri参数
     req = v_rs['item_list'][0]['video']['play_addr']['uri']
     # 下载无水印视频
-    v_url = "https://www.douyin.com/aweme/v1/play/?video_id={}".format(req)
-    await client.send_message(user, f"1 vedio sending...")
+    v_url = f"https://www.douyin.com/aweme/v1/play/?video_id={req}"
+    await client.send_message(user, f"1 vedio sending...\ndownload link: {v_url}")
     await client.send_file(user, v_url, vedio_note=True)
 
 
@@ -93,7 +93,7 @@ async def pics(surl, user):
 @client.on(events.NewMessage(pattern='/start'))
 async def start(event):
     sender = await client.get_entity(event.peer_id.user_id)
-    response = f"hello! {sender.username}, this is a bot create by oacia"
+    response = f"hello! {sender.username}, this is a bot created by oacia"
     response += '''
     now the bot has these features:
         - download douyin vedio or pictures by sending a shared link

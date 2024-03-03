@@ -10,8 +10,6 @@ import random
 import string
 
 # 请求头
-header = {
-    "User-Agent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Mobile Safari/537.36"}
 
 DEBUG = False  # 区分远程环境和调试环境
 
@@ -22,6 +20,7 @@ if not DEBUG:
     render_name = os.getenv("RENDER_NAME")
     session = "oacia_bot"
     proxy = None
+    cookie = os.getenv("COOKIE")
     if render_name:
         requests.post(f"https://api.telegram.org/bot{bot_token}/setWebhook?url=https://{render_name}.onrender.com/webhook")
         if requests.status_codes == 200:
@@ -35,32 +34,69 @@ else:
     bot_token = config["BOT_TOKEN"]
     session = config["SESSION"]
     proxy = config["PROXY"]
+    cookie = config["COOKIE"]
+
+header = {
+    "Referer": "https://www.douyin.com/",
+    "User-Agent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Mobile Safari/537.36",
+    "Cookie": cookie,
+}
 
 client = TelegramClient(session, api_id, api_hash, proxy=proxy).start(bot_token=bot_token)
 
 
-# 抖音视频无水印
+# 抖音视频下载
 async def videos(surl, user):
     id = re.search(r'video/(\d+)', surl).group(1)
-    # print(id)
-    # 获取json数据
-    u_id = "https://m.douyin.com/web/api/v2/aweme/iteminfo/?item_ids={}&a_bogus=".format(id)
-    v_rs = requests.get(url=u_id, headers=header).json()
+    params = {
+        "device_platform": "webapp",
+        "aid": "6383",
+        "channel": "channel_pc_web",
+        "aweme_id": id,
+        "pc_client_type": "1",
+        "version_code": "190500",
+        "version_name": "19.5.0",
+        "cookie_enabled": "true",
+        "platform": "PC",
+        "downlink": "10",
+    }
+    note_api = "https://www.douyin.com/aweme/v1/web/aweme/detail/"
+    try:
+        v_rs = requests.get(url=note_api, headers=header, params=params).json()
+    except:
+        await client.send_message(user, "cookie失效啦!!")
+        return
     # 获取uri参数
-    req = v_rs['item_list'][0]['video']['play_addr']['uri']
+    req = v_rs["aweme_detail"]['video']['play_addr']['uri']
     # 下载无水印视频
     v_url = f"https://www.douyin.com/aweme/v1/play/?video_id={req}"
-    await client.send_message(user, f"1 vedio sending...\ndownload link: {v_url}")
+    await client.send_message(user, f"1 vedio sending...\ndownload link: {v_url}",link_preview=False)
     await client.send_file(user, v_url, vedio_note=True)
 
 
 # 抖音图片无水印
 async def pics(surl, user):
     pid = re.search(r'note/(\d+)', surl).group(1)
-    p_id = "https://m.douyin.com/web/api/v2/aweme/iteminfo/?reflow_source=reflow_page&item_ids={}&a_bogus=".format(pid)
-    p_rs = requests.get(url=p_id, headers=header).json()
+    params = {
+        "device_platform": "webapp",
+        "aid": "6383",
+        "channel": "channel_pc_web",
+        "aweme_id": pid,
+        "pc_client_type": "1",
+        "version_code": "190500",
+        "version_name": "19.5.0",
+        "cookie_enabled": "true",
+        "platform": "PC",
+        "downlink": "10",
+    }
+    note_api = "https://www.douyin.com/aweme/v1/web/aweme/detail/"
+    try:
+        p_rs = requests.get(url=note_api, headers=header,params=params).json()
+    except:
+        await client.send_message(user, "cookie失效啦!!")
+        return
     # 拿到images下的原图片
-    images = p_rs['item_list'][0]['images']
+    images = p_rs["aweme_detail"]["images"]
     await client.send_message(user, f"{len(images)} photos sending...")
     for i, im in enumerate(images):
         p_req = requests.get(url=im['url_list'][0])
@@ -75,37 +111,20 @@ async def pics(surl, user):
         else:
             await client.send_message(user, f"No.{i + 1} picture is facing {p_req.status_code} error!")
             await client.send_file(user, im['url_list'][0])
-        # async with aiohttp.ClientSession() as session:
-        #     async with session.get(im['url_list'][0]) as response:
-        #         if response.status == 200:
-        #             photo = BytesIO()
-        #             photo.name = f'{photo}.jpg'
-        #             buffer = await response.read()
-        #             photo.write(buffer)
-        #             photo.seek(0, 0)
-        #             print(f"send {i} pic")
-        #             await client.send_file(user, photo,force_document=True)
-        #         else:
-        #             await client.send_message(user,f"No.{i+1} picture is facing {response.status} error!")
-        #             await client.send_file(user,im['url_list'][0],force_document=True)
 
 
 @client.on(events.NewMessage(pattern='/start'))
 async def start(event):
     sender = await client.get_entity(event.peer_id.user_id)
-    response = f"hello! {sender.username}, this is a bot created by oacia"
+    response = f"hello! {sender.username}, this is a bot created by @oacia"
     response += '''
     now the bot has these features:
         - download douyin vedio or pictures by sending a shared link
     have a good time!
-    
-    
+    source code: https://github.com/oacia/oacia_bot
+    tutorial: https://oacia.dev/telegram-bot-develop
+    you can deploy this bot by yourself~
     '''
-    await event.reply(response)
-    response = "source code: https://github.com/oacia/oacia_bot"
-    await event.reply(response)
-    response = '''tutorial: https://oacia.dev/telegram-bot-develop
-    you can deploy this bot by yourself~'''
     await event.reply(response)
 
 @client.on(events.NewMessage(pattern=r'.*v\.douyin\.com.*'))
@@ -137,6 +156,7 @@ import subprocess
 # 都会阻塞进程,而render只能运行一个python 命令,所以这是取巧的做法, but it works well
 def run_flask():
     subprocess.Popen(["python", "for_render.py"])
+    subprocess.Popen(["python", "keep_work.py"])
 
 
 if __name__ == "__main__":

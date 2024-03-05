@@ -1,8 +1,10 @@
 import time
 import requests
+import os
 
+render_name = os.getenv("RENDER_NAME")
 def send_post_request():
-    url = "http://0.0.0.0:10000/webhook"
+    url = f"https://{render_name}.onrender.com/webhook"
     data = {"data": "hello world"}
     requests.post(url, data=data)
 
